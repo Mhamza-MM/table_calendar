@@ -202,7 +202,7 @@ class TableCalendar<T> extends StatefulWidget {
   final void Function(PageController pageController)? onCalendarCreated;
 
   /// Events for date
-  final List<Widget>? events;
+  final List<Map<String, dynamic>>? events;
 
   /// Icon shown at tiopp right
   final Widget? positionedIcon;

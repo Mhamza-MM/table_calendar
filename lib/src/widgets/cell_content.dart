@@ -24,7 +24,7 @@ class CellContent extends StatelessWidget {
   final bool isWeekend;
   final CalendarStyle calendarStyle;
   final CalendarBuilders calendarBuilders;
-  final List<Widget>? events;
+  final List<Map<String, dynamic>>? events;
   final Widget? icon;
   final TextStyle? defaultTextStyle;
   final TextStyle? selectedTextStyle;
@@ -199,11 +199,23 @@ class CellContent extends StatelessWidget {
             ],
           ),
           events != null && !isDisabled
-              ? Expanded(
-                  child: ListView.builder(
-                    itemCount: events!.length,
-                    itemBuilder: (_, index) => Container(
-                      child: events![index],
+              ? Flexible(
+                fit: FlexFit.tight,
+                  child: ScrollConfiguration(
+                    behavior: ScrollBehavior().copyWith(overscroll: false),
+                    child: ListView.builder(
+                      itemCount: events!.length,
+                      itemBuilder: (_, index) {
+                        DateTime dateTime = events![index]['date'];
+                        if (day.year == dateTime.year &&
+                            day.month == dateTime.month &&
+                            day.day == dateTime.day) {
+                          return Container(
+                            child: events![index]['widget'],
+                          );
+                        }
+                        return SizedBox.shrink();
+                      },
                     ),
                   ),
                 )
