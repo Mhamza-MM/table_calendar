@@ -1,6 +1,7 @@
 // Copyright 2019 Aleksander Woźniak
 // SPDX-License-Identifier: Apache-2.0
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
@@ -23,6 +24,12 @@ class CellContent extends StatelessWidget {
   final bool isWeekend;
   final CalendarStyle calendarStyle;
   final CalendarBuilders calendarBuilders;
+  final List<Widget>? events;
+  final Widget? icon;
+  final TextStyle? defaultTextStyle;
+  final TextStyle? selectedTextStyle;
+  final Decoration? defaultDecoration;
+  final Decoration? selectedDecoration;
 
   const CellContent({
     Key? key,
@@ -41,6 +48,12 @@ class CellContent extends StatelessWidget {
     required this.isHoliday,
     required this.isWeekend,
     this.locale,
+    this.events,
+    this.icon,
+    this.defaultTextStyle,
+    this.selectedTextStyle,
+    this.defaultDecoration,
+    this.selectedDecoration,
   }) : super(key: key);
 
   @override
@@ -53,12 +66,12 @@ class CellContent extends StatelessWidget {
     }
 
     final text = '${day.day}';
+    final weekdayString = DateFormat.EEEE(locale).format(day);
+    final semanticsLabelString =
+        '$weekdayString, ${DateFormat.yMMMMd(locale).format(day)}';
+
     final margin = calendarStyle.cellMargin;
     final duration = const Duration(milliseconds: 250);
-
-    final dowLabel = DateFormat.EEEE(locale).format(day);
-    final dayLabel = DateFormat.yMMMMd(locale).format(day);
-    final semanticsLabel = '$dowLabel, $dayLabel';
 
     if (isDisabled) {
       cell = calendarBuilders.disabledBuilder?.call(context, day, focusedDay) ??
@@ -67,16 +80,29 @@ class CellContent extends StatelessWidget {
             margin: margin,
             decoration: calendarStyle.disabledDecoration,
             alignment: Alignment.center,
-            child: Text(text, style: calendarStyle.disabledTextStyle),
+            child: Semantics(
+                label: semanticsLabelString,
+                excludeSemantics: true,
+                child: Text(text, style: calendarStyle.disabledTextStyle)),
           );
     } else if (isSelected) {
       cell = calendarBuilders.selectedBuilder?.call(context, day, focusedDay) ??
           AnimatedContainer(
             duration: duration,
             margin: margin,
-            decoration: calendarStyle.selectedDecoration,
+            decoration: selectedDecoration ?? calendarStyle.selectedDecoration,
             alignment: Alignment.center,
-            child: Text(text, style: calendarStyle.selectedTextStyle),
+            child: Semantics(
+              label: semanticsLabelString,
+              excludeSemantics: true,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Text(
+                  text,
+                  style: selectedTextStyle ?? calendarStyle.selectedTextStyle,
+                ),
+              ),
+            ),
           );
     } else if (isRangeStart) {
       cell =
@@ -86,7 +112,11 @@ class CellContent extends StatelessWidget {
                 margin: margin,
                 decoration: calendarStyle.rangeStartDecoration,
                 alignment: Alignment.center,
-                child: Text(text, style: calendarStyle.rangeStartTextStyle),
+                child: Semantics(
+                    label: semanticsLabelString,
+                    excludeSemantics: true,
+                    child:
+                        Text(text, style: calendarStyle.rangeStartTextStyle)),
               );
     } else if (isRangeEnd) {
       cell = calendarBuilders.rangeEndBuilder?.call(context, day, focusedDay) ??
@@ -95,36 +125,27 @@ class CellContent extends StatelessWidget {
             margin: margin,
             decoration: calendarStyle.rangeEndDecoration,
             alignment: Alignment.center,
-            child: Text(text, style: calendarStyle.rangeEndTextStyle),
+            child: Semantics(
+                label: semanticsLabelString,
+                excludeSemantics: true,
+                child: Text(text, style: calendarStyle.rangeEndTextStyle)),
           );
     } else if (isToday && isTodayHighlighted) {
       cell = calendarBuilders.todayBuilder?.call(context, day, focusedDay) ??
           AnimatedContainer(
             duration: duration,
             margin: margin,
-            decoration: calendarStyle.todayDecoration,
+            decoration: defaultDecoration ?? calendarStyle.todayDecoration,
             alignment: Alignment.center,
-            child: Text(text, style: calendarStyle.todayTextStyle),
+            child: Semantics(
+                label: semanticsLabelString,
+                excludeSemantics: true,
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Text(text,
+                      style: defaultTextStyle ?? calendarStyle.todayTextStyle),
+                )),
           );
-    } else if (isHoliday) {
-      cell = calendarBuilders.holidayBuilder?.call(context, day, focusedDay) ??
-          AnimatedContainer(
-            duration: duration,
-            margin: margin,
-            decoration: calendarStyle.holidayDecoration,
-            alignment: Alignment.center,
-            child: Text(text, style: calendarStyle.holidayTextStyle),
-          );
-    } else if (isWithinRange) {
-      cell =
-          calendarBuilders.withinRangeBuilder?.call(context, day, focusedDay) ??
-              AnimatedContainer(
-                duration: duration,
-                margin: margin,
-                decoration: calendarStyle.withinRangeDecoration,
-                alignment: Alignment.center,
-                child: Text(text, style: calendarStyle.withinRangeTextStyle),
-              );
     } else if (isOutside) {
       cell = calendarBuilders.outsideBuilder?.call(context, day, focusedDay) ??
           AnimatedContainer(
@@ -132,30 +153,63 @@ class CellContent extends StatelessWidget {
             margin: margin,
             decoration: calendarStyle.outsideDecoration,
             alignment: Alignment.center,
-            child: Text(text, style: calendarStyle.outsideTextStyle),
+            child: Semantics(
+                label: semanticsLabelString,
+                excludeSemantics: true,
+                child: Text(text, style: calendarStyle.outsideTextStyle)),
           );
     } else {
       cell = calendarBuilders.defaultBuilder?.call(context, day, focusedDay) ??
           AnimatedContainer(
             duration: duration,
             margin: margin,
-            decoration: isWeekend
-                ? calendarStyle.weekendDecoration
-                : calendarStyle.defaultDecoration,
+            decoration: defaultDecoration ?? calendarStyle.todayDecoration,
             alignment: Alignment.center,
-            child: Text(
-              text,
-              style: isWeekend
-                  ? calendarStyle.weekendTextStyle
-                  : calendarStyle.defaultTextStyle,
+            child: Semantics(
+              label: semanticsLabelString,
+              excludeSemantics: true,
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Text(
+                  text,
+                  style: defaultTextStyle ?? calendarStyle.todayTextStyle,
+                ),
+              ),
             ),
           );
     }
 
-    return Semantics(
-      label: semanticsLabel,
-      excludeSemantics: true,
-      child: cell,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey, width: 0.5),
+      ),
+      child: Column(
+        children: [
+          Expanded(child: Container()),
+          Stack(
+            children: [
+              cell,
+              isDisabled
+                  ? SizedBox.shrink()
+                  : Positioned(
+                      top: 3,
+                      right: 5,
+                      child: icon ?? SizedBox.shrink(),
+                    ),
+            ],
+          ),
+          events != null && !isDisabled
+              ? Expanded(
+                  child: ListView.builder(
+                    itemCount: events!.length,
+                    itemBuilder: (_, index) => Container(
+                      child: events![index],
+                    ),
+                  ),
+                )
+              : Expanded(child: Container()),
+        ],
+      ),
     );
   }
 }

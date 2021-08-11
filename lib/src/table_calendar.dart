@@ -201,6 +201,17 @@ class TableCalendar<T> extends StatefulWidget {
   /// Called when the calendar is created. Exposes its PageController.
   final void Function(PageController pageController)? onCalendarCreated;
 
+  /// Events for date
+  final List<Widget>? events;
+
+  /// Icon shown at tiopp right
+  final Widget? positionedIcon;
+
+  final TextStyle? defaultTextStyle;
+  final TextStyle? selectedTextStyle;
+  final Decoration? defaultDecoration;
+  final Decoration? selectedDecoration;
+
   /// Creates a `TableCalendar` widget.
   TableCalendar({
     Key? key,
@@ -256,6 +267,12 @@ class TableCalendar<T> extends StatefulWidget {
     this.onPageChanged,
     this.onFormatChanged,
     this.onCalendarCreated,
+    this.events,
+    this.positionedIcon,
+    this.defaultTextStyle,
+    this.selectedTextStyle,
+    this.defaultDecoration,
+    this.selectedDecoration,
   })  : assert(availableCalendarFormats.keys.contains(calendarFormat)),
         assert(availableCalendarFormats.length <= CalendarFormat.values.length),
         assert(weekendDays.isNotEmpty
@@ -609,6 +626,12 @@ class _TableCalendarState<T> extends State<TableCalendar<T>> {
           isWeekend: isWeekend,
           isHoliday: widget.holidayPredicate?.call(day) ?? false,
           locale: widget.locale,
+          events: widget.events,
+          icon: widget.positionedIcon,
+          defaultDecoration: widget.defaultDecoration,
+          defaultTextStyle: widget.defaultTextStyle,
+          selectedDecoration: widget.selectedDecoration,
+          selectedTextStyle: widget.selectedTextStyle,
         );
 
         children.add(content);
